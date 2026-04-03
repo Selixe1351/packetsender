@@ -1,0 +1,43 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.2.0'
+    id 'maven-publish'
+}
+
+group = 'net.atlantisservices'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+    implementation 'redis.clients:jedis:4.3.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'net.atlantisservices'
+            artifactId = 'packetsender'
+            version = project.version
+
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri("https://repository.atlantisservices.net/repository/api/")
+            credentials {
+                username = project.findProperty('nexusUsername') ?: System.getenv('NEXUS_USERNAME')
+                password = project.findProperty('nexusPassword') ?: System.getenv('NEXUS_PASSWORD')
+            }
+        }
+    }
+}
