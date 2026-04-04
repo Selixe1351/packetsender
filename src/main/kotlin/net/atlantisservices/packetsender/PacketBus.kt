@@ -38,7 +38,8 @@ import java.util.concurrent.Executors
 class PacketBus(
     private val channel: String = "packets",
     private val gson: Gson = GsonBuilder().serializeNulls().create(),
-    private val executor: Executor = Executors.newSingleThreadExecutor()
+    private val executor: Executor = Executors.newSingleThreadExecutor(),
+    private val classLoader: ClassLoader = PacketBus::class.java.classLoader
 ) {
 
     private var pool: JedisPool? = null
@@ -64,7 +65,7 @@ class PacketBus(
         Thread({
             pool!!.resource.use { jedis ->
                 if (credentials.auth) jedis.auth(credentials.password)
-                jedis.subscribe(PacketPubSub(gson), channel)
+                jedis.subscribe(PacketPubSub(gson, classLoader), channel)
             }
         }, "PacketBus-Subscriber").apply { isDaemon = true }.start()
     }

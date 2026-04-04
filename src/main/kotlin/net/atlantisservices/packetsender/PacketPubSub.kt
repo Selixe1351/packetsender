@@ -17,7 +17,7 @@ import redis.clients.jedis.JedisPubSub
  *
  * @param gson The [Gson] instance used for deserialization. Should match the one used when publishing.
  */
-internal class PacketPubSub(private val gson: Gson) : JedisPubSub() {
+internal class PacketPubSub(private val gson: Gson, private val classLoader: ClassLoader) : JedisPubSub() {
 
     /**
      * Invoked by Jedis when a message arrives on the subscribed channel.
@@ -38,7 +38,7 @@ internal class PacketPubSub(private val gson: Gson) : JedisPubSub() {
             val json = message.substring(delimIndex + 2)
 
             val packetClass = try {
-                Class.forName(className).asSubclass(Packet::class.java)
+                Class.forName(className, true, classLoader).asSubclass(Packet::class.java)
             } catch (e: ClassNotFoundException) {
                 System.err.println("Unknown packet class '$className' — ignoring")
                 return
